@@ -89,3 +89,15 @@ class ReviewsIndex(APIView):
             reviews = self.serializer_class(queryset, many=True)
             return Response(reviews.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+class ReviewDetail(APIView):
+    def delete(self, request, review_id):
+        try:
+            review = Review.objects.get(id=review_id)
+            review.delete()
+            return Response({"message": "Review deleted successfully."}, status=status.HTTP_200_OK)
+        except Review.DoesNotExist:
+            return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as err:
+            return Response({"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
