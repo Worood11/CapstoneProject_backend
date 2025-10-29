@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Bookstore
-from .serializers import BookstoreSerializer
+from .models import Bookstore , Review
+from .serializers import BookstoreSerializer , ReviewSerializer
 
 # Define the home view
 class Home(APIView):
@@ -67,3 +67,25 @@ class BookstoreDetail(APIView):
             return Response({'success': True}, status=status.HTTP_200_OK)
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class ReviewsIndex(APIView):
+    serializer_class = ReviewSerializer
+
+    def get(self, request, bookstore_id):
+        try:
+            queryset = Review.objects.filter(bookstore=bookstore_id)
+            serializer = self.serializer_class(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, bookstore_id):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(bookstore_id=bookstore_id)  
+            queryset = Review.objects.filter(bookstore=bookstore_id)
+            reviews = self.serializer_class(queryset, many=True)
+            return Response(reviews.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
