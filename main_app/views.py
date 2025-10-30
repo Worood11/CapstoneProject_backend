@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from .models import Bookstore , Review
 from .serializers import BookstoreSerializer , ReviewSerializer , UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 
 # User Registration
@@ -29,7 +30,20 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class LoginView(APIView):
 
+  def post(self, request):
+    try:
+      username = request.data.get('username')
+      password = request.data.get('password')
+      user = authenticate(username=username, password=password)
+      if user:
+        refresh = RefreshToken.for_user(user)
+        content = {'refresh': str(refresh), 'access': str(refresh.access_token),'user': UserSerializer(user).data}
+        return Response(content, status=status.HTTP_200_OK)
+      return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as err:
+      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # Define the home view
 class Home(APIView):
   def get(self, request):
