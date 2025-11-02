@@ -7,7 +7,7 @@ urlpatterns = [
     path('bookstores/<int:bookstore_id>/reviews/', ReviewsIndex.as_view(), name='review-create'),
     path('reviews/<int:review_id>/', ReviewDetail.as_view(), name='review-detail'),
     path('users/signup/', CreateUserView.as_view(), name='signup'),
-     path('users/login/', LoginView.as_view(), name='login'),
+    path('users/login/', LoginView.as_view(), name='login'),
 
 
 ]
