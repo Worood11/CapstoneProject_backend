@@ -25,3 +25,15 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.rating}⭐"
+    
+
+class Event(models.Model):
+    bookstore = models.ForeignKey(Bookstore, on_delete=models.CASCADE, related_name='events')
+    name = models.CharField(max_length=100)
+    description = models.TextField(max_length=500)
+    date = models.DateField()
+    time = models.TimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.bookstore.name})"

@@ -4,8 +4,8 @@ from rest_framework import status , generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Bookstore , Review
-from .serializers import BookstoreSerializer , ReviewSerializer , UserSerializer
+from .models import Bookstore , Review , Event
+from .serializers import BookstoreSerializer , ReviewSerializer , UserSerializer , EventSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
@@ -139,3 +139,68 @@ class ReviewDetail(APIView):
             return Response({"error": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as err:
             return Response({"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class EventsIndex(APIView):
+    serializer_class = EventSerializer
+
+    def get(self, request, bookstore_id):
+      
+        try:
+            queryset = Event.objects.filter(bookstore_id=bookstore_id)
+            serializer = self.serializer_class(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, bookstore_id):
+    
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                serializer.save(bookstore_id=bookstore_id)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class EventDetail(APIView):
+    serializer_class = EventSerializer
+
+    def get(self, request, event_id):
+    
+        try:
+            event = get_object_or_404(Event, id=event_id)
+            serializer = self.serializer_class(event)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, event_id):
+        
+        try:
+            event = get_object_or_404(Event, id=event_id)
+            serializer = self.serializer_class(event, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, event_id):
+       
+        try:
+            event = get_object_or_404(Event, id=event_id)
+            event.delete()
+            return Response({'message': 'Event deleted successfully.'}, status=status.HTTP_200_OK)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class EventListCreateView(generics.ListCreateAPIView):
+    queryset = Event.objects.all().order_by('-date')
+    serializer_class = EventSerializer
