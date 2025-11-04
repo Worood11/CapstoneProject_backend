@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from rest_framework import status , generics
+from rest_framework import status , generics , permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -8,6 +8,9 @@ from .models import Bookstore , Review , Event
 from .serializers import BookstoreSerializer , ReviewSerializer , UserSerializer , EventSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from .permissions import IsAdminUserOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
 
 
 # User Registration
@@ -29,6 +32,23 @@ class CreateUserView(generics.CreateAPIView):
             return Response(data, status=status.HTTP_201_CREATED)
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+# User Verification
+class VerifyUserView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
+  def get(self, request):
+    try:
+      user = User.objects.get(username=request.user.username)
+      try:
+        refresh = RefreshToken.for_user(user)
+        return Response({'refresh': str(refresh),'access': str(refresh.access_token),'user': UserSerializer(user).data}, status=status.HTTP_200_OK)
+      except Exception as token_error:
+        return Response({"detail": "Failed to generate token.", "error": str(token_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as err:
+      return Response({"detail": "Unexpected error occurred.", "error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class LoginView(APIView):
 
@@ -53,6 +73,7 @@ class Home(APIView):
 
 class BookstoresIndex(APIView):
   serializer_class = BookstoreSerializer
+  permission_classes = [IsAdminUserOrReadOnly]
 
   def get(self, request):
     data = list(Bookstore.objects.values())
@@ -78,11 +99,13 @@ class BookstoresIndex(APIView):
 
 class BookstoreDetail(APIView):
     serializer_class = BookstoreSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get(self, request, bookstore_id):
         try:
             bookstore = get_object_or_404(Bookstore, id=bookstore_id)
             serializer = self.serializer_class(bookstore)
+            # translate data
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -110,6 +133,8 @@ class BookstoreDetail(APIView):
 
 class ReviewsIndex(APIView):
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
 
     def get(self, request, bookstore_id):
         try:
@@ -144,6 +169,7 @@ class ReviewDetail(APIView):
 
 class EventsIndex(APIView):
     serializer_class = EventSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get(self, request, bookstore_id):
       
@@ -168,6 +194,7 @@ class EventsIndex(APIView):
 
 class EventDetail(APIView):
     serializer_class = EventSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get(self, request, event_id):
     

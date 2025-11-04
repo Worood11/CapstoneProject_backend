@@ -4,13 +4,12 @@ from django.contrib.auth.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # Add a password field, make it write-only
-    # prevents allowing 'read' capabilities (returning the password via api response)
-    password = serializers.CharField(write_only=True)  
+    password = serializers.CharField(write_only=True)
+    role = serializers.CharField(source='profile.role', read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ('id', 'username', 'email', 'password', 'role')
 
     def create(self, validated_data):
         user = User.objects.create_user(
