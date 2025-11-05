@@ -38,6 +38,9 @@ It manages the database, authentication, and core business logic, and exposes **
   <img src="https://img.shields.io/badge/nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="nginx" />
 </p>
 
+---
+<img width="740" height="521" alt="Untitled" src="https://github.com/user-attachments/assets/c59eba55-6b9e-4c01-a07b-abf72863e5a9" />
+
 
 <h1>Bookstore</h1>
 <table border="1" width="100%">
