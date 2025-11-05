@@ -34,7 +34,8 @@ ALLOWED_HOSTS = []
 CORS_ALLOW_ALL_ORIGINS=False
 CORS_ALLOW_HEADERS = '*'
 CORS_ALLOWED_ORIGINS=[
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "capstoneprojectbackend-production-6611.up.railway.app"
 ]
 
 # Application definition
