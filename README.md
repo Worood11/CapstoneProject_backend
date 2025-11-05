@@ -168,7 +168,7 @@ It manages the database, authentication, and core business logic, and exposes **
 ---
 
 ### 🌐 API Base URL
-👉 `http://127.0.0.1:8000`  
+👉 [Bookstop Backend Deployment Link](http://127.0.0.1:8000)  
 
 
 ---
