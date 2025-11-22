@@ -27,6 +27,7 @@ class Bookstore(models.Model):
     
 class Review(models.Model):
     bookstore = models.ForeignKey(Bookstore, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews' , null=True , blank=True)
     title = models.CharField(max_length=100)
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
